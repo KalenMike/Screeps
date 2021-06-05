@@ -9,7 +9,6 @@ var role = {
             let success = creep.depositEnergy();
 
             if (!success) {
-                creep.moveTo(24, 24);
                 creep.say("Idle");
             }
         }

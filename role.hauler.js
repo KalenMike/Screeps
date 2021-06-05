@@ -1,5 +1,5 @@
 var role = {
-    name: 'hauler',
+    name: "hauler",
     /** @param {Creep} creep **/
     run: function (creep) {
         if (creep.store.getFreeCapacity() > 0) {
@@ -8,8 +8,11 @@ var role = {
             let success = creep.depositEnergyToSpawn();
 
             if (!success) {
-                creep.moveTo(24, 24);
-                creep.say("Idle");
+                let success = creep.depositEnergyToTower();
+
+                if (!success) {
+                    creep.say("Idle");
+                }
             }
         }
     },
@@ -32,11 +35,11 @@ var role = {
         });
 
         let storageAvailable =
-        Game.spawns["Headquaters"].room.energyCapacityAvailable -
-        Game.spawns["Headquaters"].room.energyAvailable;
+            Game.spawns["Headquaters"].room.energyCapacityAvailable -
+            Game.spawns["Headquaters"].room.energyAvailable;
 
         // Spawn is not at capacity
-        if (alive.length < max && sources.length && storageAvailable > 0 ) {
+        if (alive.length < max && sources.length && storageAvailable > 0) {
             var newName = role.name + Game.time.toString();
 
             return {

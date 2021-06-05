@@ -9,18 +9,19 @@ Creep.prototype.harvestEnergy = function () {
                 visualizePathStyle: { stroke: "#ffffff" },
             });
         }
+        this.say('Harvest');
         return true;
     } else {
         return false;
     }
 };
 
-Creep.prototype.loadEnergy = function () {
+Creep.prototype.loadEnergy = function (min = 0) {
     // Find closest container with energy
     var container = this.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s) =>
             s.structureType == STRUCTURE_CONTAINER &&
-            s.store[RESOURCE_ENERGY] > 0,
+            s.store[RESOURCE_ENERGY] > min,
     });
     if (container) {
         if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -28,6 +29,25 @@ Creep.prototype.loadEnergy = function () {
                 visualizePathStyle: { stroke: "#ffffff" },
             });
         }
+        this.say('Load');
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Creep.prototype.sweepEnergy = function () {
+    var dropped = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+        filter: (s) => s.resourceType == RESOURCE_ENERGY,
+    });
+
+    if (dropped) {
+        if (this.pickup(dropped, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            this.moveTo(dropped, {
+                visualizePathStyle: { stroke: "#ffffff" },
+            });
+        }
+        this.say("Sweep");
         return true;
     } else {
         return false;
@@ -35,12 +55,20 @@ Creep.prototype.loadEnergy = function () {
 };
 
 Creep.prototype.loadOrHarvestEnergy = function () {
-    let success = this.loadEnergy();
+    let success = this.sweepEnergy();
+
+    // console.log('Sweep: ' + success);
+
+    if (!success) {
+        success = this.loadEnergy(50);
+        // console.log('Load: ' + success);
+    }
 
     if (!success) {
         success = this.harvestEnergy();
+        // console.log('Harvest: ' + success);
     }
-
+    
     if (success) {
         return true;
     } else {
@@ -89,7 +117,29 @@ Creep.prototype.depositEnergyToContainer = function () {
     let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (structure) => {
             return (
-                structure.structureType == STRUCTURE_CONTAINER&&
+                structure.structureType == STRUCTURE_CONTAINER &&
+                structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+            );
+        },
+    });
+    // There is available storage
+    if (target) {
+        if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            this.moveTo(target, {
+                visualizePathStyle: { stroke: "#ffaa00" },
+            });
+        }
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Creep.prototype.depositEnergyToTower = function () {
+    let target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (structure) => {
+            return (
+                structure.structureType == STRUCTURE_TOWER &&
                 structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
         },

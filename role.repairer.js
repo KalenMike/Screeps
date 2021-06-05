@@ -4,19 +4,29 @@ var role = {
     run: function (creep) {
         if (creep.memory.repairing && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.repairing = false;
-            creep.say("🔄 harvest");
         }
         if (!creep.memory.repairing && creep.store.getFreeCapacity() == 0) {
             creep.memory.repairing = true;
-            creep.say("🚧 repair");
         }
 
         if (creep.memory.repairing) {
+            // Prioritise Containers
             var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return structure.hits < structure.hitsMax;
+                    return (
+                        structure.structureType == STRUCTURE_CONTAINER &&
+                        structure.hits < structure.hitsMax
+                    );
                 },
             });
+            // No containers fix others
+            if (!target) {
+                var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return structure.hits < structure.hitsMax;
+                    },
+                });
+            }
             if (target) {
                 if (creep.repair(target) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, {
@@ -29,7 +39,6 @@ var role = {
             let success = creep.loadEnergy();
 
             if (!success) {
-                creep.moveTo(14, 24);
                 creep.say("Idle");
             }
         }
@@ -58,7 +67,11 @@ var role = {
         });
 
         // One repairer per damaged structure capping at max
-        if (repairers.length < damaged.length && repairers.length < max && sources.length) {
+        if (
+            repairers.length < damaged.length &&
+            repairers.length < max &&
+            sources.length
+        ) {
             var newName = "Repairer" + Game.time.toString();
 
             return {

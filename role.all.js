@@ -6,23 +6,26 @@ var roleMiner = require("role.miner");
 var roleHauler = require("role.hauler");
 
 // Set Maximums by Stage
+var controllerLevel = Game.rooms[Game.spawns["Headquaters"].room.name].controller.level;
 
 // Stage 1
-// Mobile Harvesters deliver to Spawn and Containers
-const MAX_HARVESTERS = 0;
-const MAX_UPGRADERS = 4;
-const MAX_BUILDERS = 2;
-const MAX_REPAIRERS = 4;
-const MAX_MINERS = 2;
-const MAX_HAULER = 4;
-
-// Stage 2
-// Stationary Miners deliver to on spot container, haulers move energy to Spawn
-// const MAX_HARVESTERS = 0;
-// const MAX_UPGRADERS = 1;
-// const MAX_BUILDERS = 1;
-// const MAX_REPAIRERS = 0;
-// const MAX_MINERS = 2;
+if (controllerLevel <= 1){
+    // Mobile Harvesters deliver to Spawn and Containers
+    var MAX_HARVESTERS = 3;
+    var MAX_UPGRADERS = 1;
+    var MAX_BUILDERS = 1;
+    var MAX_REPAIRERS = 0;
+    var MAX_MINERS = 0;
+    var MAX_HAULER = 0;
+}else if(controllerLevel > 1){
+    // Mobile Harvesters deliver to Spawn and Containers
+    var MAX_HARVESTERS = 0;
+    var MAX_UPGRADERS = 2;
+    var MAX_BUILDERS = 2;
+    var MAX_REPAIRERS = 2;
+    var MAX_MINERS = 2;
+    var MAX_HAULER = 2;
+}
 
 var allRoles = {
     [roleHarvester.name]: {
